@@ -1,0 +1,116 @@
+buildscript {
+    repositories {
+        maven { url "http://repo.spring.io/libs-milestone" }
+        mavenLocal()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.4.RELEASE")
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.0.0'
+        
+    }
+    
+}
+
+apply plugin: 'java'
+apply plugin: "groovy"
+apply plugin: 'eclipse'
+apply plugin: 'build-dashboard'
+apply plugin: 'codenarc'
+apply from: './properties.gradle'
+apply plugin: 'spring-boot'
+apply plugin: 'pitest'
+
+
+
+sourceCompatibility = 1.8
+
+jar {
+    baseName = 'metricsCoda-kata'
+    version = '0.1.0'
+}
+
+pitest {
+    targetClasses = ['pl.java.scalatech.test.*']
+    threads = 1
+}
+
+sourceSets {
+    intTest
+    main {
+        java { srcDir 'src/main/java' }
+        resources { srcDir 'src/main/resources' }
+    }
+    test {
+        java { srcDir 'src/test/java' }
+        resources { srcDir 'src/test/resources' }
+    }
+}
+
+
+repositories {
+    mavenCentral()
+    maven { url "http://repo.spring.io/libs-snapshot" }
+    maven {
+        url "http://repo.codahale.com/"
+    }
+}
+
+dependencies {
+    compile ("org.codehaus.groovy:groovy:${groovyVersion}")
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-aop")
+    compile("org.springframework.boot:spring-boot-starter-logging")
+    compile("org.springframework.boot:spring-boot-starter-data-mongodb")
+    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
+    compile("org.springframework:spring-context-support:4.1.0.RELEASE")
+    compile ("javax.servlet:javax.servlet-api:${servletVersion}")
+    compile ("org.springframework.hateoas:spring-hateoas:0.16.0.RELEASE")
+    compile("org.webjars:jquery:2.1.1")
+    compile("org.webjars:bootstrap:3.2.0")
+
+ 
+    
+    compile ("com.sun.jersey:jersey-bundle:1.18")
+   
+    compile("org.projectlombok:lombok:${lombokVersion}")
+    compile("com.google.guava:guava:${guavaVersion}")
+    
+    compile("com.codahale.metrics:metrics-core:${codahale}")
+    compile("com.codahale.metrics:metrics-jvm:${codahale}")
+    compile("com.codahale.metrics:metrics-logback:${codahale}")
+    
+    compile("com.ryantenney.metrics:metrics-spring:3.0.1")
+    compile("com.codahale.metrics:metrics-servlet:${codahale}")
+    compile("com.codahale.metrics:metrics-servlets:${codahale}")
+    
+    compile("org.apache.httpcomponents:httpclient:${httpClientVersion}")
+    compile("org.apache.httpcomponents:fluent-hc:${httpClientVersion}")
+    
+    compile("com.google.code.gson:gson:${gsonVersion}")
+    compile("org.yaml:snakeyaml:{snakeYamlVersion}")
+    compile ("javax.mail:mail:1.4.7")
+    
+    
+     testCompile("org.hamcrest:hamcrest-all:$hamcrestVersion")
+     compile("org.mockito:mockito-all:$mockitoVersion")
+     testCompile("junit:junit:$junitVersion")
+    // testCompile("org.openjdk.jmh:jmh-core:$jmhVersion")
+     testCompile("org.easytesting:fest-assert:${festAssertVersion}")
+     testCompile ("org.springframework:spring-test:${springVersion}")
+     testCompile ("org.spockframework:spock-core:0.7-groovy-2.0")   
+}
+
+
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}

@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org" th:lang="${#locale.language}">
+
+
+<head th:include="fragment/headTag :: headTag">
+<title>metrics-poc</title>
+</head>
+
+<body>
+	<form action="fileUpload" th:action="@{/fileUpload}" method="post"
+		enctype="multipart/form-data">
+		<input type="file" name="myFile" /> <input type="submit" />
+	</form>
+</body>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+<div th:include="fragment/footer :: footer" />
+
+</html>

@@ -1,0 +1,12 @@
+project :
+        artifactId:content-repository
+        name:cep
+        version:0.0.1
+        description:flexible content repository
+
+info:
+         artifact : content-repository
+         name : cep
+         description : REST content repository
+         version : 0.0.1
+

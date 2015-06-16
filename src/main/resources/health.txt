@@ -1,0 +1,48 @@
+public class DatabaseHealthCheck extends HealthCheck {
+private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHealthCheck.class);
+private final EntityManager entityManager;
+public DatabaseHealthCheck(EntityManager entityManager) {
+this.entityManager = entityManager;
+}
+@Override
+protected Result check() throws Exception {
+LOGGER.info("Do DatabaseHealthCheck...");
+Result result;
+try {
+Object data = entityManager.createQuery("FROM Bookmark").getFirstResult();
+if (data == null) {
+LOGGER.warn("Check is KO");
+result = Result.unhealthy("Request returned no result");
+} else {
+LOGGER.info("Check is OK");
+result = Result.healthy("Connection to the database is OK");
+}
+} catch (Exception e) {
+LOGGER.error("Check is KO : an error occured");
+LOGGER.error(e.toString());
+result = Result.unhealthy("Request returned no result");
+}
+return result;
+}
+}
+
+import com.codahale.metrics.health.HealthCheck;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.fluent.Request;
+/**
+* Example of an HTTP based Metrics <code>HealthChecker</code>
+*/
+public class RestResourcesHealthCheck extends HealthCheck {
+private final String pingUrl;
+public RestResourcesHealthCheck(String pingUrl) {
+this.pingUrl = pingUrl;
+}
+@Override
+protected Result check() throws Exception {
+HttpResponse response = Request.Get(pingUrl).execute().returnResponse();
+if (response == null || response.getStatusLine().getStatusCode() != 200) {
+return Result.unhealthy("REST resources are not available");
+}
+return Result.healthy("REST resources are available :-)");
+}
+}
