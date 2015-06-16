@@ -82,3 +82,4 @@ gc.log
 metrics.log
 
 /file_from_fd_store.png
+*.log
