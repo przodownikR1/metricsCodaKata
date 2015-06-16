@@ -1,6 +1,7 @@
 package pl.java.scalatech;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
+
 import pl.java.scalatech.config.AppConfig;
 import pl.java.scalatech.domain.Dictionary;
 import pl.java.scalatech.service.DictionaryService;
@@ -42,7 +44,7 @@ public class MetricsCodaForServer extends SpringBootServletInitializer {
 
     }
 
-    private String addDefaultProfile() {
+    private static String addDefaultProfile() {
         String profile = System.getProperty("spring.profiles.default");
         if (profile != null) {
             log.info("+++                                     Running with Spring profile(s) : {}", profile);
