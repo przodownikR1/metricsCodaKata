@@ -1,7 +1,5 @@
 package pl.java.scalatech.config;
 
-import java.io.File;
-import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -20,9 +18,7 @@ import pl.java.scalatech.config.metrics.DiskCapacityHealthCheck;
 import pl.java.scalatech.config.metrics.RestResourcesHealthCheck;
 import pl.java.scalatech.interceptor.LoggingMetricRegistryListener;
 
-import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.CsvReporter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
@@ -40,39 +36,40 @@ import com.ryantenney.metrics.spring.config.annotation.MetricsConfigurerAdapter;
 @Configuration
 @EnableMetrics
 @Slf4j
-@org.springframework.context.annotation.Import(value=MongoDBConfig.class)
+@org.springframework.context.annotation.Import(value = MongoDBConfig.class)
 public class Metrics2Config extends MetricsConfigurerAdapter {
 
     private final MetricRegistry metricRegistry = new MetricRegistry();
     private final HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
-    
+
     @Autowired
     private Mongo mongo;
-    
+
     @Bean
     @Override
     public MetricRegistry getMetricRegistry() {
         metricRegistry.registerAll(new GarbageCollectorMetricSet());
         metricRegistry.registerAll(new MemoryUsageGaugeSet());
-       // metricRegistry.registerAll(new ThreadStatesGaugeSet());
+        // metricRegistry.registerAll(new ThreadStatesGaugeSet());
         metricRegistry.addListener(new LoggingMetricRegistryListener());
 
-  /*    metricRegistry.register("jvm.files", new FileDescriptorRatioGauge());
-        metricRegistry.register("jvm.buffers", new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));*/
+        /*
+         * metricRegistry.register("jvm.files", new FileDescriptorRatioGauge());
+         * metricRegistry.register("jvm.buffers", new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));
+         */
 
-        
         metricRegistry.register(MetricRegistry.name("przodownik", "gauge", "size"), new Gauge<Integer>() {
             Random random = new Random();
 
             @Override
             public Integer getValue() {
-                return  + random.nextInt(1000);
+                return +random.nextInt(1000);
             }
         });
         configureReporters(metricRegistry);
         return metricRegistry;
     }
-    
+
     @Bean
     @Override
     public HealthCheckRegistry getHealthCheckRegistry() {
@@ -85,20 +82,20 @@ public class Metrics2Config extends MetricsConfigurerAdapter {
 
     }
 
-
     @Override
     public void configureReporters(MetricRegistry metricRegistry) {
-        log.info("+++                                        configureReporters");  
-       /* ConsoleReporter.forRegistry(metricRegistry).build().start(10, TimeUnit.SECONDS);*/
+        log.info("+++                                        configureReporters");
+        /* ConsoleReporter.forRegistry(metricRegistry).build().start(10, TimeUnit.SECONDS); */
 
-        Slf4jReporter.forRegistry(metricRegistry).outputTo(log).convertRatesTo(TimeUnit.SECONDS)
-                .convertDurationsTo(TimeUnit.MILLISECONDS).build().start(1, TimeUnit.MINUTES);
-        
-       /* CsvReporter reporter = CsvReporter.forRegistry(metricRegistry).formatFor(Locale.US).convertRatesTo(TimeUnit.SECONDS)
-                .convertDurationsTo(TimeUnit.MILLISECONDS).build(new File("slawek.csv"));
-        
-        reporter.start(1, TimeUnit.SECONDS);*/
-        
+        Slf4jReporter.forRegistry(metricRegistry).outputTo(log).convertRatesTo(TimeUnit.SECONDS).convertDurationsTo(TimeUnit.MILLISECONDS).build()
+                .start(1, TimeUnit.MINUTES);
+
+        /*
+         * CsvReporter reporter = CsvReporter.forRegistry(metricRegistry).formatFor(Locale.US).convertRatesTo(TimeUnit.SECONDS)
+         * .convertDurationsTo(TimeUnit.MILLISECONDS).build(new File("slawek.csv"));
+         * reporter.start(1, TimeUnit.SECONDS);
+         */
+
         JmxReporter.forRegistry(metricRegistry).build().start();
     }
 
@@ -109,18 +106,18 @@ public class Metrics2Config extends MetricsConfigurerAdapter {
         healthCheckRegistry.register("deadlocks", new ThreadDeadlockHealthCheck());
         healthCheckRegistry.register("REST resources", new RestResourcesHealthCheck("http://localhost:8090/api/appContext"));
         healthCheckRegistry.register("disk space check", new DiskCapacityHealthCheck());
-        
+
     }
 
     @Bean
     @Autowired
     public ServletRegistrationBean servletRegistrationBean(MetricRegistry metricRegistry) {
         MetricsServlet ms = new MetricsServlet(metricRegistry);
-        ServletRegistrationBean srb = new ServletRegistrationBean(ms, "/metrics/*");
+        ServletRegistrationBean srb = new ServletRegistrationBean(ms, "/stats/*");
         srb.setLoadOnStartup(1);
         return srb;
     }
-    
+
     @Bean
     @Autowired
     public ServletRegistrationBean servletHealthRegistryBean(HealthCheckRegistry healthCheckRegistry) {
@@ -129,12 +126,5 @@ public class Metrics2Config extends MetricsConfigurerAdapter {
         srb.setLoadOnStartup(2);
         return srb;
     }
-    @Bean
-    @Autowired
-    public ServletRegistrationBean servletPingRegistryBean(HealthCheckRegistry healthCheckRegistry) {
-        HealthCheckServlet hc = new HealthCheckServlet(healthCheckRegistry);
-        ServletRegistrationBean srb = new ServletRegistrationBean(hc, "/health/*");
-        srb.setLoadOnStartup(2);
-        return srb;
-    }
+
 }
