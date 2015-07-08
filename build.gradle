@@ -106,7 +106,8 @@ uploadArchives {
        }
     }
 }
-
+println "Using Spring Boot version: [$springBootVersion]"
+println "Using Java version: [" + System.getProperty("java.version") + "]"
 
 task wrapper(type: Wrapper) {
 }
