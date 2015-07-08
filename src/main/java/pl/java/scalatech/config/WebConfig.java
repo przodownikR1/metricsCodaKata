@@ -9,7 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.codec.CharEncoding;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.MultipartConfigFactory;
+import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -17,17 +19,17 @@ import org.springframework.context.annotation.Description;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.repository.support.DomainClassConverter;
 import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.HateoasSortHandlerMethodArgumentResolver;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.data.web.PagedResourcesAssemblerArgumentResolver;
-import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.validation.Validator;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -35,7 +37,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
@@ -183,6 +184,27 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
     public @Bean RestTemplate restTemplate() {
         return new RestTemplate();
+    }
+
+    @Bean
+    public MultipartConfigElement multipartConfigElement(@Value("${upload.max_archive_size}") long maxUploadSize) {
+        MultipartConfigFactory factory = new MultipartConfigFactory();
+        factory.setMaxRequestSize(maxUploadSize);
+        factory.setMaxFileSize(maxUploadSize);
+        return factory.createMultipartConfig();
+    }
+
+    @Bean
+    public StandardServletMultipartResolver multipartResolver() {
+        return new StandardServletMultipartResolver();
+    }
+
+    @Bean
+    public ServletRegistrationBean dispatcherServlet() {
+        ServletRegistrationBean registration = new ServletRegistrationBean(new DispatcherServlet(), "/");
+        log.info("+++        dispatcherServlet ... init");
+        registration.setAsyncSupported(true);
+        return registration;
     }
 
 }

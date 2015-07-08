@@ -31,9 +31,14 @@ public class MetricsCodaForServer extends SpringBootServletInitializer {
         SpringApplication.run(MetricsCodaForServer.class, args);
     }
 
+    public static void configure() {
+        log.info("+++ configure servlet");
+    }
+
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         SpringApplicationBuilder app = application.profiles(addDefaultProfile()).sources(WebConfiguration.class);
+        // application.initializers(new Initializer());
         return app;
     }
 
