@@ -1,10 +1,13 @@
 buildscript {
+    ext {
+        springBootVersion = '1.2.5.RELEASE'
+    }
     repositories {
         maven { url "http://repo.spring.io/libs-milestone" }
         mavenLocal()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.5.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.0.0'
         
     }
