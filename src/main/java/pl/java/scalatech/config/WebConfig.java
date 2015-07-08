@@ -2,6 +2,7 @@ package pl.java.scalatech.config;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.servlet.MultipartConfigElement;
 
@@ -11,7 +12,6 @@ import org.apache.commons.codec.CharEncoding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.MultipartConfigFactory;
-import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -27,10 +27,12 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.Validator;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
-import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -199,12 +201,35 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         return new StandardServletMultipartResolver();
     }
 
-    @Bean
-    public ServletRegistrationBean dispatcherServlet() {
-        ServletRegistrationBean registration = new ServletRegistrationBean(new DispatcherServlet(), "/");
-        log.info("+++        dispatcherServlet ... init");
-        registration.setAsyncSupported(true);
-        return registration;
+    /*
+     * @Bean
+     * public ServletRegistrationBean dispatcherServlet() {
+     * ServletRegistrationBean registration = new ServletRegistrationBean(new DispatcherServlet(), "/");
+     * log.info("+++        dispatcherServlet ... init");
+     * registration.setAsyncSupported(true);
+     * return registration;
+     * }
+     */
+    @Value("${session-timeout}")
+    private Long sessionTimeOut;
+
+    @Override
+    public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
+        configurer.setDefaultTimeout(sessionTimeOut * 1000L);
+        log.info("configureAsyncSupport ");
+        configurer.registerCallableInterceptors(timeoutInterceptor());
     }
 
+    @Bean
+    public TimeoutCallableProcessingInterceptor timeoutInterceptor() {
+        return new TimeoutCallableProcessingInterceptor();
+    }
+
+    static class TimeoutCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter {
+
+        @Override
+        public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
+            throw new IllegalStateException("[" + task.getClass().getName() + "] timed out");
+        }
+    }
 }
